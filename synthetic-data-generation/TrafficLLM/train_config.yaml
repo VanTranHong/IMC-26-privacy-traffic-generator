@@ -1,0 +1,68 @@
+# Training configuration actually used to train TrafficLLM locally
+# (extracted from the locally-modified ../TrafficLLM/dual-stage-tuning/trafficllm_stage1.sh —
+#  NOT the pristine upstream trafficllm_stage1.sh vendored in this folder, whose
+#  defaults instead run the NLP instruction-tuning stage on ../datasets/instructions/instructions.json)
+#
+# Source: TrafficLLM, https://github.com/ZGC-LLM-Safety/TrafficLLM
+#
+# Despite the script name "stage1" (normally neural-language instruction tuning),
+# this local run repurposes it for task-specific traffic tuning on the VNAT dataset,
+# resuming from an existing checkpoint. Mirrors the effective torchrun command:
+#   PRE_SEQ_LEN=128 LR=2e-2 NUM_GPUS=1 CUDA_VISIBLE_DEVICES=1 \
+#   PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True TORCH_LOAD_WEIGHTS_ONLY=0 \
+#   torchrun --standalone --nnodes=1 --nproc-per-node=1 main.py \
+#     --do_train \
+#     --train_file ../output_TrafficLLM/VNAT_final_train/VNAT_final_train_preprocessed_generation_packet_train.json \
+#     --validation_file ../output_TrafficLLM/VNAT_final_train/VNAT_final_train_preprocessed_generation_packet_test.json \
+#     --preprocessing_num_workers 10 \
+#     --prompt_column instruction --response_column output \
+#     --overwrite_cache --cache_dir ../cache \
+#     --model_name_or_path ../models/chatglm2/chatglm2-6b-complete \
+#     --output_dir ../models/chatglm2/peft/VNAT_final_train \
+#     --overwrite_output_dir \
+#     --max_source_length 512 --max_target_length 2000 \
+#     --per_device_train_batch_size 1 --per_device_eval_batch_size 1 \
+#     --gradient_accumulation_steps 4 \
+#     --predict_with_generate \
+#     --max_steps 29750 \
+#     --logging_steps 10 --save_steps 10 \
+#     --learning_rate 2e-2 --pre_seq_len 128 \
+#     --fp16 --gradient_checkpointing --quantization_bit 4 \
+#     --resume_from_checkpoint /net/scratch/vantran/code/TrafficLLM/models/chatglm2/peft/VNAT_final_train/checkpoint-28970
+
+model:
+  model_name_or_path: "../models/chatglm2/chatglm2-6b-complete"   # locally renamed/re-downloaded base checkpoint (upstream default: ../models/chatglm2/chatglm2-6b)
+  pre_seq_len: 128
+  quantization_bit: 4              # not present in upstream script; added locally for memory savings
+  fp16: true                        # not present in upstream script
+  gradient_checkpointing: true      # not present in upstream script
+
+data:
+  train_file: "../output_TrafficLLM/VNAT_final_train/VNAT_final_train_preprocessed_generation_packet_train.json"
+  validation_file: "../output_TrafficLLM/VNAT_final_train/VNAT_final_train_preprocessed_generation_packet_test.json"
+  prompt_column: "instruction"
+  response_column: "output"
+  preprocessing_num_workers: 10
+  cache_dir: "../cache"
+
+training:
+  task: "traffic generation (packet-level, VNAT dataset)"   # locally repurposed stage1 script; upstream stage1 default trains NLP instruction understanding instead
+  learning_rate: 2e-2
+  max_source_length: 512            # upstream instruction-tuning default: 1024
+  max_target_length: 2000           # upstream instruction-tuning default: 32
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 4    # upstream default: 16
+  max_steps: 29750                  # upstream default: 20000
+  logging_steps: 10
+  save_steps: 10                    # upstream default: 4000
+  num_gpus: 1
+  cuda_visible_devices: "1"
+  resume_from_checkpoint: "/net/scratch/vantran/code/TrafficLLM/models/chatglm2/peft/VNAT_final_train/checkpoint-28970"
+
+env:
+  PYTORCH_CUDA_ALLOC_CONF: "expandable_segments:True"
+  TORCH_LOAD_WEIGHTS_ONLY: "0"
+
+output:
+  output_dir: "../models/chatglm2/peft/VNAT_final_train"

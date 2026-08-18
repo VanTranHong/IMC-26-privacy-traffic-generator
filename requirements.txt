@@ -1,0 +1,101 @@
+# IMC-2026 -- Python dependencies
+#
+# Scope: this file covers the analysis/attack/mitigation code actually
+# authored in this repo --
+#   privacy-evaluation/   (data-extraction, MIA, network-attack)
+#   privacy-risk-mitigate/ (add_DP.py, anonymize.py)
+#   utility-evaluation/   (utility_evaluation.py)
+#
+# NOT covered here: synthetic-data-generation/{NetDiffusion,NetShare,NetSSM,
+# TrafficLLM} are vendored third-party training/generation codebases. 
+#
+# Recommended: Python >= 3.9, in a virtualenv/conda env dedicated to this
+# repo's own code (separate from the synthetic-data-generation envs above).
+#
+# Install with:
+#   pip install -r requirements.txt
+
+# =============================================================================
+# Core: numeric / dataframe / distribution-distance math
+# Used throughout privacy-evaluation and utility-evaluation (JSD/EMD/
+# Wasserstein-distance fidelity & leakage metrics, CSV loading, etc.)
+# =============================================================================
+numpy>=1.26,<3
+pandas>=1.5,<3
+scipy>=1.10,<2
+
+# =============================================================================
+# Packet parsing/rewriting (reads/writes .pcap files)
+# Used by:
+#   privacy-risk-mitigate/add_DP.py, anonymize.py
+#   privacy-evaluation/network-attack/network-identifiers/network_identifiers.py
+#     (--original_pcap_glob path, lazy-imported)
+#   privacy-evaluation/network-attack/sensitive-network-properties/divergence_attacks.py
+#     (extract-features subcommand, lazy-imported)
+# =============================================================================
+scapy>=2.6,<3
+
+# =============================================================================
+# utility-evaluation/utility_evaluation.py: downstream-task (TRTR vs. TSTR)
+# classifiers
+# =============================================================================
+scikit-learn>=1.3,<2   # classification_report, --classifier random_forest
+xgboost>=2.0,<3         # --classifier xgboost (default)
+catboost>=1.2,<2        # --classifier catboost (optional)
+
+# =============================================================================
+# privacy-evaluation/MIA: NetDiffusion attacks
+#   netdiffusion_blackbox_mia.py needs only Pillow (+ numpy/pandas above).
+#   netdiffusion_whitebox_mia.py additionally needs the full LoRA fine-tuning
+#   stack, since it loads a Stable Diffusion + ControlNet-LoRA checkpoint and
+#   runs a forward/backward pass to score gradient norms.
+# =============================================================================
+Pillow>=10.0,<12
+torch>=2.5,<3
+torchvision>=0.20,<1
+accelerate>=1.0,<2
+diffusers>=0.30,<1
+peft>=0.14,<1
+tqdm>=4.66,<5
+
+# =============================================================================
+# privacy-evaluation/MIA: NetSSM and TrafficLLM attacks
+#   All four scripts (netssm_{black,white}box_mia.py,
+#   trafficllm_{black,white}box_mia.py) need transformers + torch (already
+#   listed above) to load their target checkpoint and score
+#   perplexity/loss/gradient-norm. transformers>=4.45 is required to match
+#   the torch/diffusers/peft/accelerate combination above -- if you only run
+#   the NetSSM/TrafficLLM MIA scripts and skip NetDiffusion's white-box
+#   attack, you can relax this to transformers>=4.30 (TrafficLLM's own
+#   pin) but you no longer need diffusers/peft/accelerate/torchvision at all.
+# =============================================================================
+transformers>=4.45,<5
+
+# --- NetSSM MIA only: vendored model code, not a pip package ---
+# netssm_blackbox_mia.py / netssm_whitebox_mia.py import
+# `models.mixer_seq_simple.MambaLMHeadModel`, which is vendored NetSSM code
+# at ../synthetic-data-generation/NetSSM/models -- put that folder's PARENT
+# directory on PYTHONPATH (or copy models/ next to these two scripts) rather
+# than pip-installing anything for this import itself. That vendored module
+# does need these three packages, though, and mamba-ssm in particular
+# requires a CUDA-enabled build (compiles CUDA kernels; see
+# https://github.com/state-spaces/mamba for build prerequisites) -- if that
+# fails, install NetSSM's own pinned environment instead
+# (synthetic-data-generation/NetSSM/requirements.txt) and run these two
+# scripts from within it:
+mamba-ssm>=2.2,<3
+causal-conv1d>=1.5,<2
+einops>=0.8,<1
+
+# --- TrafficLLM MIA only: implicit deps of loading ChatGLM2 via HuggingFace ---
+# trafficllm_blackbox_mia.py / trafficllm_whitebox_mia.py call
+# AutoModel.from_pretrained(..., trust_remote_code=True, load_in_8bit=True,
+# device_map="auto") on THUDM/chatglm2-6b. None of the three packages below
+# are imported directly in the script -- they're pulled in at runtime by
+# transformers' 8-bit loading path and by ChatGLM2's own `trust_remote_code`
+# model code (same packages TrafficLLM's own requirements.txt lists) -- so
+# `pip check`/static analysis won't surface them, but the scripts will fail
+# at model-load time without them:
+bitsandbytes>=0.43,<1   # required by load_in_8bit=True
+sentencepiece>=0.1.99,<1  # ChatGLM2's tokenizer
+cpm_kernels>=1.0,<2       # ChatGLM2's custom CUDA kernels (quantization path)

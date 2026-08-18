@@ -1,0 +1,64 @@
+{
+    "metrics": {
+        "fidelity": [
+            {
+                "Single attribute distributional similarity": {
+                    "class": "AttrDistSimilarity",
+                    "target_list": []
+                }
+            },
+            {
+                "Single attribute coverage": {
+                    "class": "SingleAttrCoverage",
+                    "target_list": []
+                }
+            },
+            {
+                "Multiple attributes distributional similarity": {
+                    "class": "AttrDistSimilarity",
+                    "target_list": []
+                }
+            },
+            {
+                "Session length distributional similarity": {
+                    "class": "SessionLengthDistSimilarity"
+                }
+            },
+            {
+                "Single feature distributional similarity": {
+                    "class": "FeatureDistSimilarity",
+                    "target_list": []
+                }
+            },
+            {
+                "Multiple features distributional similarity": {
+                    "class": "FeatureDistSimilarity",
+                    "target_list": []
+                }
+            },
+            {
+                "Cross feature correlation": {
+                    "class": "CrossFeatureCorrelation",
+                    "target_list": []
+                }
+            },
+            {
+                "Per feature autocorrelation": {
+                    "class": "PerFeatureAutocorrelation",
+                    "target_list": []
+                }
+            },
+            {
+                "Interarrival time distributional similarity": {
+                    "class": "InterarrivalDistSimilarity"
+                }
+            },
+            {
+                "Qualitative metadata-feature correlation": {
+                    "class": "SingleAttrSingleFeatureCorrelation",
+                    "target_list": []
+                }
+            }
+        ]
+    }
+}

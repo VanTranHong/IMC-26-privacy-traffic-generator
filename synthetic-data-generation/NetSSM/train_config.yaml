@@ -1,0 +1,44 @@
+# Training configuration actually used to train NetSSM locally
+# (extracted from the locally-modified ../netssm/train.py — NOT the pristine
+#  upstream train.py vendored in this folder, which takes these as CLI flags
+#  instead of hardcoded argparse defaults)
+#
+# Source: NetSSM, https://github.com/noise-lab/netssm
+#
+# Mirrors the effective configuration of this local run:
+#   python train.py \
+#     --model=checkpoints/configs/default \
+#     --output=checkpoints/IoT_train_subnet_truncated_200_singleflow \
+#     --tokenizer=tokenizers/tokenizer_single_flow_IoT \
+#     --data_path=\
+#     --learning_rate=5e-4 \
+#     --batch_size=1 \
+#     --gradient_accumulation_steps=1 \
+#     --optim=adamw_torch \
+#     --num_epochs=1 \
+#     --torch_dtype=float32
+
+model:
+  config_path: "checkpoints/configs/default"       # checkpoints/configs/default/config.json
+  vocab_size: 280                                    # locally edited from upstream default (260) to fit extra special tokens
+  torch_dtype: "float32"
+
+data:
+  tokenizer: "tokenizers/tokenizer_single_flow_IoT"   # custom tokenizer built for the IoT single-flow dataset
+  data_path: ""
+
+training:
+  learning_rate: 5e-4
+  batch_size: 1                     # per_device_train_batch_size
+  gradient_accumulation_steps: 1
+  optim: "adamw_torch"
+  num_epochs: 1
+  save_total_limit: 100000          # locally raised from upstream default (2) to keep every checkpoint
+  logging_steps: 10
+  save_steps: 10                    # locally lowered from upstream default (500) for frequent checkpointing
+
+env:
+  TRITON_DISABLE_AUTOTUNER: "1"     # added locally to work around a Triton autotuner issue
+
+output:
+  output_dir: "checkpoints/IoT_train_subnet_truncated_200_singleflow"

@@ -1,0 +1,10 @@
+packaging==24.2
+wheel==0.45.1
+transformers==4.46.3
+torch==2.5.0
+datasets==3.1.0
+accelerate==1.0.1
+scapy==2.6.1
+gdown==5.2.0
+torchvision==0.20
+torchaudio==2.5.0

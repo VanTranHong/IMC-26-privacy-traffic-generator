@@ -1,0 +1,121 @@
+{
+    "metrics": {
+        "fidelity": [
+            {
+                "Single attribute distributional similarity": {
+                    "class": "AttrDistSimilarity",
+                    "target_list": [
+                        [
+                            "store_id"
+                        ],
+                        [
+                            "region"
+                        ]
+                    ],
+                    "configs": {
+                        "categorical_mapping": true
+                    }
+                }
+            },
+            {
+                "Single attribute coverage": {
+                    "class": "SingleAttrCoverage",
+                    "target_list": [
+                        [
+                            "store_id"
+                        ],
+                        [
+                            "region"
+                        ]
+                    ]
+                }
+            },
+            {
+                "Multiple attributes distributional similarity": {
+                    "class": "AttrDistSimilarity",
+                    "target_list": [
+                        [
+                            "store_id",
+                            "store_id"
+                        ]
+                    ]
+                }
+            },
+            {
+                "Session length distributional similarity": {
+                    "class": "SessionLengthDistSimilarity"
+                }
+            },
+            {
+                "Single feature distributional similarity": {
+                    "class": "FeatureDistSimilarity",
+                    "target_list": [
+                        [
+                            "nb_customers"
+                        ],
+                        [
+                            "total_sales"
+                        ],
+                        [
+                            "date"
+                        ],
+                        [
+                            "day_of_week"
+                        ]
+                    ]
+                }
+            },
+            {
+                "Multiple features distributional similarity": {
+                    "class": "FeatureDistSimilarity",
+                    "target_list": [
+                        [
+                            "nb_customers",
+                            "total_sales"
+                        ]
+                    ]
+                }
+            },
+            {
+                "Cross feature correlation": {
+                    "class": "CrossFeatureCorrelation",
+                    "target_list": [
+                        [
+                            "nb_customers",
+                            "total_sales"
+                        ]
+                    ]
+                }
+            },
+            {
+                "Per feature autocorrelation": {
+                    "class": "PerFeatureAutocorrelation",
+                    "target_list": [
+                        [
+                            "nb_customers"
+                        ],
+                        [
+                            "total_sales"
+                        ]
+                    ]
+                }
+            },
+            {
+                "Interarrival time distributional similarity": {
+                    "class": "InterarrivalDistSimilarity"
+                }
+            },
+            {
+                "Qualitative metadata-feature correlation": {
+                    "class": "SingleAttrSingleFeatureCorrelation",
+                    "target_list": [
+                        [
+                            "region",
+                            "total_sales"
+                        ]
+                    ]
+                }
+            }
+        ]
+    }
+}

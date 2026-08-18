@@ -1,0 +1,44 @@
+# Training configuration for NetDiffusion DreamBooth LoRA fine-tuning
+# (train_dreambooth_lora.py, original NetDiffusion / Stable Diffusion 1.5 pipeline)
+#
+# Source: NetDiffusion paper (https://arxiv.org/abs/2310.08543)
+#         https://github.com/noise-lab/NetDiffusion
+#
+# Mirrors the following accelerate launch command:
+#   accelerate launch --main_process_port 29525 --num_processes=1 train_dreambooth_lora.py \
+#     --pretrained_model_name_or_path="runwayml/stable-diffusion-v1-5" \
+#     --instance_data_dir="data_MIA_test/all-labels/IoT_training_singleflow/train_epsilon_1_new" \
+#     --val_data_dir="data_MIA_test/all-labels/IoT_training_singleflow/otheractivity-png" \
+#     --instance_prompt="pixilated network traffic type 0" \
+#     --output_dir="./lora_MIA_allcheckpoints/IoT_training_singleflow_with_val_epoch250_batchsize4_5e5_epsilon_1" \
+#     --resolution=512 --train_batch_size=4 --gradient_accumulation_steps=4 \
+#     --learning_rate=5e-5 --lr_scheduler="constant" --lr_warmup_steps=0 \
+#     --checkpointing_steps=50 --seed=4 --rank=4 --mixed_precision="fp16" \
+#     --report_to="tensorboard" --num_train_epochs=800
+
+model:
+  pretrained_model_name_or_path: "runwayml/stable-diffusion-v1-5"
+
+data:
+  instance_data_dir: ""
+  val_data_dir: ""
+  instance_prompt: "pixilated network traffic type 0"
+
+training:
+  resolution: 512
+  train_batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 5e-5
+  lr_scheduler: "constant"
+  lr_warmup_steps: 0
+  num_train_epochs: 800
+  checkpointing_steps: 50
+  rank: 4
+  mixed_precision: "fp16"
+  seed: 4
+
+logging:
+  report_to: "tensorboard"
+
+output:
+  output_dir: ""
